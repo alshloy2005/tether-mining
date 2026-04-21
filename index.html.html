@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" id="mainHtml" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>USDT PRO MINING</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
+        .tab-content { display: none; animation: slideUp 0.4s ease-out; }
+        .active-tab { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .gold-text { color: #f3ba2f; }
+        .gold-bg { background: linear-gradient(135deg, #f3ba2f, #bf951f); }
+        .nav-item { color: #444; transition: 0.3s; }
+        .nav-item.active { color: #f3ba2f; transform: scale(1.2); }
+        .bot-tag { background: rgba(243, 186, 47, 0.1); border: 1px solid rgba(243, 186, 47, 0.2); padding: 4px 12px; border-radius: 50px; font-size: 10px; color: #f3ba2f; font-weight: bold; }
+        #notification-toast { transition: 0.5s; top: -100px; }
+    </style>
+</head>
+<body class="p-4 pb-32">
+
+    <div id="notification-toast" class="fixed left-1/2 -translate-x-1/2 z-50 glass px-6 py-3 flex items-center gap-3 w-[90%] max-w-sm">
+        <div class="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+        <span id="toast-text" class="text-[10px] font-bold"></span>
+    </div>
+
+    <div class="flex justify-between items-center mb-8">
+        <button onclick="toggleLang()" class="glass px-4 py-1 text-xs font-black gold-text" id="langBtn">EN</button>
+        <div class="flex flex-col items-end">
+            <span class="text-xl font-black tracking-tighter" id="botName">USDT التعدين</span>
+            <span class="bot-tag">@Tether_Mining_2026_bot</span>
+        </div>
+    </div>
+
+    <div id="mining" class="tab-content active-tab text-center">
+        <div class="glass p-8 mb-6 relative border-t border-white/10">
+            <p class="text-gray-500 text-[9px] uppercase tracking-[3px] mb-2" id="statsUsers">المستخدمين: 145,230</p>
+            <h1 class="text-5xl font-black mb-1 tracking-tighter" id="balance">0.000000</h1>
+            <p class="gold-text font-bold text-xs uppercase">USDT Balance</p>
+        </div>
+
+        <div class="my-12 relative flex justify-center">
+            <div class="absolute inset-0 bg-[#f3ba2f] opacity-10 blur-[80px] rounded-full"></div>
+            <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" class="w-44 h-44 relative z-10 shadow-[0_0_50px_rgba(243,186,47,0.2)] rounded-full animate-pulse" alt="Tether">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="glass p-4"><p class="text-[10px] text-gray-500 mb-1" id="speedLabel">السرعة</p><p class="font-black text-lg">1.0X</p></div>
+            <div class="glass p-4"><p class="text-[10px] text-gray-500 mb-1" id="dailyLabel">الدخل اليومي</p><p class="font-black text-lg text-green-500">1.00$</p></div>
+        </div>
+    </div>
+
+    <div id="leaderboard" class="tab-content">
+        <h2 class="text-2xl font-black mb-6 gold-text text-right" id="topTitle">قائمة العمالقة (VIP)</h2>
+        <div class="space-y-3" id="vipsList"></div>
+    </div>
+
+    <div id="wallet" class="tab-content">
+        <div class="glass p-8 mb-6 text-center">
+            <p class="text-gray-400 text-sm mb-2" id="withdrawLabel">الرصيد المتاح</p>
+            <h3 class="text-4xl font-black text-green-500" id="wallet-balance">0.00$</h3>
+        </div>
+
+        <div class="glass p-6 mb-4 bg-gradient-to-b from-[#111] to-black border-gold-text">
+            <h4 class="font-black mb-2 gold-text text-sm" id="refuelLabel">شحن وقود (Boost)</h4>
+            <div class="bg-black/50 p-4 rounded-xl text-[10px] break-all font-mono border border-white/5 text-gray-500 mb-4">
+                0x83c6bd854AD4d09f05C2c82E5c7F6282f0f2f988
+            </div>
+            <button onclick="copyAddr()" class="w-full gold-bg text-black font-black py-4 rounded-2xl" id="copyBtn">نسخ العنوان</button>
+        </div>
+        <button onclick="withdraw()" class="w-full py-5 glass border-white/5 border font-black text-gray-400 rounded-2xl" id="withdrawBtn">سحب (الأدنى 10$)</button>
+    </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 flex justify-around items-center z-50 shadow-2xl">
+        <button onclick="showTab('mining')" class="nav-item active"><i class="fa-solid fa-fire-alt text-xl"></i></button>
+        <button onclick="showTab('leaderboard')" class="nav-item"><i class="fa-solid fa-crown text-xl"></i></button>
+        <button onclick="showTab('wallet')" class="nav-item"><i class="fa-solid fa-wallet text-xl"></i></button>
+    </nav>
+
+    <script>
+        let currentLang = 'ar';
+        let balance = 0;
+        let income = 1 / 86400; // 1 دولار كل 24 ساعة
+
+        const translations = {
+            ar: {
+                name: "USDT التعدين", users: "المستخدمين: ", speed: "السرعة", daily: "الدخل اليومي",
+                top: "قائمة العمالقة (VIP)", draw: "الرصيد المتاح", refuel: "شحن وقود (Boost)",
+                copy: "نسخ العنوان", withdraw: "سحب (الأدنى 10$)"
+            },
+            en: {
+                name: "USDT MINING", users: "Users: ", speed: "Speed", daily: "Daily Income",
+                top: "VIP LIST", draw: "Available", refuel: "Refuel Engine",
+                copy: "COPY ADDR", withdraw: "Withdraw (Min 10$)"
+            }
+        };
+
+        function toggleLang() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.getElementById('mainHtml').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+            updateUI();
+        }
+
+        function updateUI() {
+            const t = translations[currentLang];
+            document.getElementById('botName').innerText = t.name;
+            document.getElementById('statsUsers').innerText = t.users + "145,230";
+            document.getElementById('speedLabel').innerText = t.speed;
+            document.getElementById('dailyLabel').innerText = t.daily;
+            document.getElementById('topTitle').innerText = t.top;
+            document.getElementById('withdrawLabel').innerText = t.draw;
+            document.getElementById('refuelLabel').innerText = t.refuel;
+            document.getElementById('copyBtn').innerText = t.copy;
+            document.getElementById('withdrawBtn').innerText = t.withdraw;
+        }
+
+        function showNotification() {
+            const toast = document.getElementById('notification-toast');
+            const names = ["Ahmed", "Sultan", "User_88x", "Crypto_Pro", "Leo", "Mona_VIP"];
+            const amount = [15, 40, 100, 25, 9][Math.floor(Math.random() * 5)];
+            const name = names[Math.floor(Math.random() * names.length)];
+            document.getElementById('toast-text').innerText = currentLang === 'ar' ? `سحب ناجح بقيمة ${amount}$ لـ ${name}` : `Success withdrawal $${amount} for ${name}`;
+            toast.style.top = "20px";
+            setTimeout(() => { toast.style.top = "-100px"; }, 4000);
+        }
+        setInterval(showNotification, 20000);
+
+        const vips = [
+            {n: "Ali_Rich", p: "24,500.20"}, {n: "Crypto_Boss", p: "18,210.00"},
+            {n: "Legend_Miner", p: "12,400.55"}, {n: "User_Zero", p: "9,800.10"},
+            {n: "Diamond_Hand", p: "7,200.00"}
+        ];
+        const listDiv = document.getElementById('vipsList');
+        vips.forEach((v, i) => {
+            listDiv.innerHTML += `<div class="glass p-5 flex justify-between items-center border-r-2 border-[#f3ba2f] mb-2"><div class="flex items-center gap-4"><span class="text-gray-700 font-black text-xs">#${i+1}</span><span class="font-bold text-sm text-gray-200">${v.n}</span></div><span class="gold-text font-black text-xs">${v.p} $</span></div>`;
+        });
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active-tab');
+            event.currentTarget.classList.add('active');
+        }
+
+        setInterval(() => {
+            balance += income;
+            document.getElementById('balance').innerText = balance.toFixed(6);
+            document.getElementById('wallet-balance').innerText = balance.toFixed(2) + "$";
+        }, 1000);
+
+        function copyAddr() { alert(currentLang === 'ar' ? "تم نسخ العنوان" : "Address Copied"); }
+        function withdraw() { alert(currentLang === 'ar' ? "الرصيد غير كافٍ" : "Insufficient balance"); }
+    </script>
+</body>
+</html>
